@@ -61,6 +61,7 @@ import net.minecraftforge.common.BiomeDictionary;
 import net.minecraftforge.common.BiomeDictionary.Type;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fluids.IFluidBlock;
+import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
@@ -842,6 +843,29 @@ public class EM_EventManager
 	
 	public static int getWaterType(World world, int x, int y, int z)
 	{
+		Block block = world.getBlock(x, y, z);
+		if(block instanceof IFluidBlock)
+		{
+			Fluid fluid = ((IFluidBlock)block).getFluid();
+			if(fluid != null)
+			{
+				String fName = fluid.getName().toLowerCase();
+				if(fName.contains("salt") || fName.contains("sea") || fName.contains("ocean"))
+				{
+					return 2;
+				} else if(fName.contains("dirty") || fName.contains("stagnant") || fName.contains("swamp") || fName.contains("poison") || fName.contains("toxic"))
+				{
+					return 1;
+				} else if(fName.contains("cold") || fName.contains("ice") || fName.contains("frost"))
+				{
+					return 3;
+				} else if(fName.contains("river") || fName.contains("fresh"))
+				{
+					return 0;
+				}
+			}
+		}
+		
 		BiomeGenBase biome = world.getBiomeGenForCoords(x, z);
 		DimensionProperties dProps = EM_Settings.dimensionProperties.get(world.provider.dimensionId);
 		int seaLvl = dProps != null? dProps.sealevel : 64;
