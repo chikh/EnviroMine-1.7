@@ -60,6 +60,8 @@ import net.minecraftforge.client.event.sound.PlaySoundEvent17;
 import net.minecraftforge.common.BiomeDictionary;
 import net.minecraftforge.common.BiomeDictionary.Type;
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.fluids.IFluidBlock;
+import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
@@ -613,13 +615,14 @@ public class EM_EventManager
 				
 				boolean isWater;
 				
+				Block block = world.getBlock(i, j, k);
 				
-				if(world.getBlock(i, j, k) == Blocks.water || world.getBlock(i, j, k) == Blocks.flowing_water)
+				if(block.getMaterial() == Material.water)
 				{
 					isWater = true;
 					
 					// if finite is on.. make sure player cant drink from a infinite flowing water source
-					if(world.getBlockMetadata(i, j, k) > .2f && EM_Settings.finiteWater)
+					if(EM_Settings.finiteWater && (block == Blocks.water || block == Blocks.flowing_water) && world.getBlockMetadata(i, j, k) > 0)
 					{
 						isWater = false;
 					}
@@ -666,7 +669,13 @@ public class EM_EventManager
 						player.worldObj.setBlockMetadataWithNotify(i, j, k, player.worldObj.getBlockMetadata(i, j, k) - 1, 2);
 					} else if(EM_Settings.finiteWater)
 					{
-						player.worldObj.setBlock(i, j, k, Blocks.flowing_water, player.worldObj.getBlockMetadata(i, j, k) + 1, 2);
+						if (block instanceof IFluidBlock)
+						{
+							((IFluidBlock)block).drain(world, i, j, k, true);
+						} else
+						{
+							player.worldObj.setBlock(i, j, k, Blocks.flowing_water, player.worldObj.getBlockMetadata(i, j, k) + 1, 2);
+						}
 					}
 					
 					--item.stackSize;
@@ -724,12 +733,14 @@ public class EM_EventManager
 				
 				boolean isWater;
 				
-				if(entityPlayer.worldObj.getBlock(i, j, k) == Blocks.flowing_water  || entityPlayer.worldObj.getBlock(i, j, k) == Blocks.water)
+				Block block = entityPlayer.worldObj.getBlock(i, j, k);
+				
+				if(block.getMaterial() == Material.water)
 				{
 					isWater = true;
 					
 					// if finite is on.. make sure player cant drink from a infinite flowing water source
-					if(entityPlayer.worldObj.getBlockMetadata(i, j, k) > .2f && EM_Settings.finiteWater)
+					if(EM_Settings.finiteWater && (block == Blocks.water || block == Blocks.flowing_water) && entityPlayer.worldObj.getBlockMetadata(i, j, k) > 0)
 					{
 						isWater = false;
 					}
@@ -808,7 +819,13 @@ public class EM_EventManager
 							entityPlayer.worldObj.setBlockMetadataWithNotify(i, j, k, entityPlayer.worldObj.getBlockMetadata(i, j, k) - 1, 2);
 						} else if(EM_Settings.finiteWater)
 						{
-							entityPlayer.worldObj.setBlock(i, j, k, Blocks.flowing_water, entityPlayer.worldObj.getBlockMetadata(i, j, k) + 1, 2);
+							if (block instanceof IFluidBlock)
+							{
+								((IFluidBlock)block).drain(entityPlayer.worldObj, i, j, k, true);
+							} else
+							{
+								entityPlayer.worldObj.setBlock(i, j, k, Blocks.flowing_water, entityPlayer.worldObj.getBlockMetadata(i, j, k) + 1, 2);
+							}
 						}
 						
 						entityPlayer.worldObj.playSoundAtEntity(entityPlayer, "random.drink", 1.0F, 1.0F);
