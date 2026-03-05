@@ -21,7 +21,7 @@ public class EM_Settings
 	public static File worldDir = null;
 	
 	//Mod Data
-	public static final String Version = "FWG_EM_VER";
+	public static final String Version = "1.3.124-gt6-fix-1";
 	public static final String ModID = "enviromine";
 	public static final String Channel = "EM_CH";
 	public static final String Name = "EnviroMine";
